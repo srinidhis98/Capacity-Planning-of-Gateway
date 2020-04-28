@@ -20,3 +20,7 @@ nohup sshpass -p velocloud ssh root@$ip -p 2001 pkill ping &
 nohup sshpass -p velocloud ssh root@$ip -p 2003 pkill ping &
 nohup sshpass -p velocloud ssh root@$ip -p 2005 pkill ping &
 }
+case $1 in
+	funcA) "$@"; exit;;
+	funcB) "$@"; exit;;
+esac
