@@ -1,5 +1,6 @@
-import pandas as pd
 from pathlib import Path
+import sys
+import pandas as pd
 import plotly.express as px
 
 
@@ -24,16 +25,16 @@ def combine_data(file1, file2, file3):
 
 def filter_data(*args, file1):
     print(args)
-    df1 = pd.read_csv(file1)
+    data_frame1 = pd.read_csv(file1)
     # print(df1.loc[df1['Time'] == args[0]])
     # print(df1.loc[df1['Time'] == args[1]])
     for items in args:
-        print(df1.loc[df1['Time'] == items])
+        print(data_frame1.loc[data_frame1['Time'] == items])
 
 
 def graphs(file, x_co, y_co):
-    df = pd.read_csv(file)
-    fig = px.line(df, x=x_co, y=y_co, title=f'{x_co} and {y_co}')
+    dataframe = pd.read_csv(file)
+    fig = px.line(dataframe, x=x_co, y=y_co, title=f'{x_co} and {y_co}')
     fig.show()
 
 
@@ -66,7 +67,7 @@ def main():
 
 
         else:
-            exit()
+            sys.exit()
 
 
 if __name__ == '__main__':
