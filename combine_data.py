@@ -56,7 +56,7 @@ def filter_data(data, file1, column_name):
     print(data)
     d_frame = pd.read_csv(file1)
     new_frame1 = tabulate(d_frame.loc[d_frame[column_name] == data], headers= d_frame.loc[
-        data == d_frame[column_name]].columns, tablefmt='psql', showindex=False)
+        data == d_frame[column_name]].columns, tablefmt='psql', showindex=False, floatfmt='.1f')
     # new_frame2 = d_frame.loc[d_frame[column_name] == data]
     print(new_frame1)
     # print(new_frame2)
