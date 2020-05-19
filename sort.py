@@ -65,7 +65,9 @@ def remove_na(data_frame):
     data_frame = data_frame.sort_values('%idle', ignore_index=True, ascending=True, na_position='last')
     data_frame['%idle'] = data_frame['%idle'].astype('float')
     data_frame['%idle'] = data_frame['%idle'].round(3)
-    data_frame1 = data_frame[data_frame['%idle'] >= 2.00]
+    min_val = data_frame['%idle'].min()
+    print(min_val)
+    data_frame1 = data_frame[data_frame['%idle'] >= min_val]
     print(tabulate(data_frame1.head(10), headers=data_frame.columns, showindex=False, floatfmt='.1f'))
     data_frame1.fillna(value='-', inplace=True)
     # print(tabulate(data_frame1.head(10), headers=data_frame.columns, showindex=False, floatfmt='.1f'))
