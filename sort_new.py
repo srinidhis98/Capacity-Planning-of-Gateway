@@ -1,13 +1,17 @@
+from tabulate import tabulate
 import sys
 import pandas as pd
 import numpy as np
-from tabulate import tabulate
 
 
 def print_data(min_df):
+    # tb = sys.exc_info()
+    # print(tb)
+    row, col = min_df.shape
     new_df = min_df.iloc[0]
     i = 0
-    while True:
+
+    while i <= row:
         if min_df['NAT'].iloc[i] == '-' or min_df['NAT'].iloc[i] == 'nan':
             i += 1
             continue
@@ -20,6 +24,13 @@ def print_data(min_df):
         else:
             new_df = min_df.iloc[i]
             break
+    # else:
+    #     if float(new_df['NAT']):
+    #         new_df['NAT'] = min_df['NAT'].max()
+    #     elif float(new_df['Flow_count']):
+    #         new_df['Flow_count'] = min_df['Flow_count'].max()
+    #     elif float(new_df['Hanodffq_drops']):
+    #         new_df['Handoffq_drops'] = min_df['Handoffq_drops'].max()
 
     memory_used_percent = float(new_df['Used']) / float(new_df['Total']) * 100
     print("-----------------------------------")
@@ -48,7 +59,7 @@ def report(data_frame, name):
             sys.stdout = sys.__stdout__
     else:
         core_info = remove_na(data_frame, name)
-        print(tabulate(core_info, tablefmt='psql'))
+        print(tabulate(core_info.head(25), tablefmt='psql'))
         core_num = core_info['CPU'].iloc[0]
         cpu_util = float(100 - float(core_info['%idle'].iloc[0]))
         print(f'Most loaded CPU utlised: {cpu_util} (core {core_num})')
@@ -78,7 +89,7 @@ def remove_na(data_frame, name):
     data_frame['%idle'] = data_frame['%idle'].round(3)
     min_val = data_frame['%idle'].min()
     print(min_val)
-    data_frame1 = data_frame[data_frame['%idle'] >= min_val]
+    data_frame1 = data_frame[data_frame['%idle'] > min_val]
     print(tabulate(data_frame1.head(10), headers=data_frame.columns, showindex=False, floatfmt='.1f'))
     data_frame1.fillna(value='-', inplace=True)
     # print(tabulate(data_frame1.head(10), headers=data_frame.columns, showindex=False, floatfmt='.1f'))
