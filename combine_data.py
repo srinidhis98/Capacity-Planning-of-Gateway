@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from tabulate import tabulate
 import sys
@@ -27,9 +26,13 @@ def combine_data(file1, file2, file3):
             drop_items = input('Enter the name of fields separated by space')
             dup_list = drop_items.split()
             print(dup_list)
-            df_dup = data_frame_out.drop_duplicates(subset=dup_list, keep="last")
-            print(len(df_dup))
-            df_dup.to_csv(file3, index=False)
+            data_frame_out.drop_duplicates(subset=dup_list, keep="first", inplace=True)
+            # print(df_dup.head(10))
+            # print(df_dup.tail(10))
+            # print(len(df_dup))
+            print(data_frame_out.tail(10))
+            print(len(data_frame_out))
+            data_frame_out.to_csv(file3, index=False)
             drop_duplicate_choice = 'no'
 
         except:
@@ -45,7 +48,7 @@ def data_frame1(args):
     pass
 
 
-def filter_data(data, file1, column_name):
+def filter_bytime(data, file1, column_name):
     """
     This function filters the data and prints it based on the params specified
     :param data:
@@ -55,7 +58,7 @@ def filter_data(data, file1, column_name):
     """
     print(data)
     d_frame = pd.read_csv(file1)
-    new_frame1 = tabulate(d_frame.loc[d_frame[column_name] == data], headers= d_frame.loc[
+    new_frame1 = tabulate(d_frame.loc[d_frame[column_name] == data], headers=d_frame.loc[
         data == d_frame[column_name]].columns, tablefmt='psql', showindex=False, floatfmt='.1f')
     # new_frame2 = d_frame.loc[d_frame[column_name] == data]
     print(new_frame1)
@@ -114,7 +117,7 @@ def main():
                 print(data_frame.columns)
                 col_name = input("Enter the column which is to be filtered")
                 data_to_be = input('Enter data to be filtered')
-                filter_data(data_to_be, file1=file_name, column_name=col_name)
+                filter_bytime(data_to_be, file1=file_name, column_name=col_name)
             else:
                 print("Wrong File name")
 
