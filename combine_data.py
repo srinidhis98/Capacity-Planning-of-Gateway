@@ -48,7 +48,7 @@ def data_frame1(args):
     pass
 
 
-def filter_bytime(data, file1, column_name):
+def filter_data(data, file1, column_name):
     """
     This function filters the data and prints it based on the params specified
     :param data:
@@ -58,7 +58,8 @@ def filter_bytime(data, file1, column_name):
     """
     print(data)
     d_frame = pd.read_csv(file1)
-    new_frame1 = tabulate(d_frame.loc[d_frame[column_name] == data], headers=d_frame.loc[
+    d_frame.sort_values(by='Time', inplace=True)
+    new_frame1 = tabulate(d_frame[d_frame[column_name] == data], headers=d_frame[
         data == d_frame[column_name]].columns, tablefmt='psql', showindex=False, floatfmt='.1f')
     # new_frame2 = d_frame.loc[d_frame[column_name] == data]
     print(new_frame1)
@@ -117,7 +118,7 @@ def main():
                 print(data_frame.columns)
                 col_name = input("Enter the column which is to be filtered")
                 data_to_be = input('Enter data to be filtered')
-                filter_bytime(data_to_be, file1=file_name, column_name=col_name)
+                filter_data(data_to_be, file1=file_name, column_name=col_name)
             else:
                 print("Wrong File name")
 
