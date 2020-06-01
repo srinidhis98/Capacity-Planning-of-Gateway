@@ -4,6 +4,7 @@ import sys
 import os
 import pandas as pd
 import plotly.express as px
+import numpy as np
 
 
 def combine_data(file1, file2, file3):
@@ -60,7 +61,7 @@ def filter_data(data, file1, column_name):
     d_frame = pd.read_csv(file1)
     d_frame.sort_values(by='Time', inplace=True)
     new_frame1 = tabulate(d_frame[d_frame[column_name] == data], headers=d_frame[
-        data == d_frame[column_name]].columns, tablefmt='psql', showindex=False, floatfmt='.1f')
+        d_frame[column_name] == data].columns, tablefmt='psql', showindex=False, floatfmt='.1f')
     # new_frame2 = d_frame.loc[d_frame[column_name] == data]
     print(new_frame1)
     # print(new_frame2)
@@ -83,15 +84,114 @@ def graphs(file, x_co, y_co):
     :param y_co:
     :return:
     """
-    dataframe = pd.read_csv(file)
-    fig = px.line(dataframe, x=x_co, y=y_co, title=f'{x_co} and {y_co}')
+    df = pd.read_csv(file)
+    fig = px.line(df, x=x_co, y=y_co, title=f'{x_co} and {y_co}')
     fig.show()
+
+
+def print_data(min_df):
+    row, col = min_df.shape
+    new_df = min_df.iloc[0]
+    i = 0
+
+    while i <= row:
+        if min_df['NAT'].iloc[i] == '-' or min_df['NAT'].iloc[i] == 'nan':
+            i += 1
+            continue
+        elif min_df['Flow_count'].iloc[i] == '-' or min_df['Flow_count'].iloc[i] == 'nan':
+            i += 1
+            continue
+        elif min_df['Handoffq_drops'].iloc[i] == '-' or min_df['Handoffq_drops'].iloc[i] == 'nan':
+            i += 1
+            continue
+        elif min_df['Total'].iloc[i] == '-' or min_df['Total'].iloc[i] == 'nan':
+            i += 1
+            continue
+        elif min_df['Used'].iloc[i] == '-' or min_df['Used'].iloc[i] == 'nan':
+            i += 1
+            continue
+        else:
+            new_df = min_df.iloc[i]
+            break
+    # else:
+    #     if float(new_df['NAT']):
+    #         new_df['NAT'] = min_df['NAT'].max()
+    #     elif float(new_df['Flow_count']):
+    #         new_df['Flow_count'] = min_df['Flow_count'].max()
+    #     elif float(new_df['Hanodffq_drops']):
+    #         new_df['Handoffq_drops'] = min_df['Handoffq_drops'].max()
+
+    memory_used_percent = float(new_df['Used']) / float(new_df['Total']) * 100
+    print("-----------------------------------")
+    print('Time: ', new_df['Time'])
+    print('Flow count:', int(new_df['Flow_count']))
+    print('Handoffq drops:', int(new_df['Handoffq_drops']))
+    print('NAT:', new_df['NAT'])
+    print('Network Bandwidth[kbps_in/ kbps_out]:', int(new_df['eth0_Kbps_in']), '/', int(new_df['eth0_Kbps_out']))
+    print('Memory Used:', memory_used_percent)
+    print('*Overall* CPU utilised:', float(100 - float(new_df['%idle'])))
+
+
+def report(data_frame, call):
+    if call == 1:
+        sorted_data = remove_na(data_frame)
+        # min_df = sorted_data.head(10)
+        print(tabulate(sorted_data.head(25), headers=sorted_data.columns, tablefmt='psql'))
+        # try:
+        # print(f'{name}')
+        print_data(sorted_data)
+        print(f'CHECK IN \'report.txt\' FOR THIS DETAILS')
+        with open('report.txt', 'a') as file:
+            sys.stdout = file
+            # print(f'{name}')
+            print_data(sorted_data)
+            sys.stdout = sys.__stdout__
+        return
+
+    if call == 2:
+        core_info = remove_na(data_frame)
+        print(tabulate(core_info.head(25), headers=core_info.columns, tablefmt='psql'))
+        core_num = core_info['CPU'].iloc[0]
+        cpu_util = float(100 - float(core_info['%idle'].iloc[0]))
+        print(f'Most loaded CPU utilised: {cpu_util} (core {core_num})')
+        print("-----------------------------------")
+        with open('report.txt', 'a') as file:
+            sys.stdout = file
+            print(f'Most loaded CPU utilised: {cpu_util} (core {core_num})')
+            print("-----------------------------------")
+            sys.stdout = sys.__stdout__
+        return
+    # except ValueError:
+    #     min_df = sorted_data.iloc[1]
+    #     print(min_df)
+    #     print(f'{name}')
+    #     print_data(min_df)
+    #     with open('report.txt', 'a') as file:
+    #         sys.stdout = file
+    #         print_data(min_df)
+    #         sys.stdout = sys.__stdout__
+
+
+def remove_na(data_frame):
+    data_frame = data_frame.replace(r'^\s*$', np.nan, regex=True)
+    # print(tabulate(df.head(10), headers=df.columns, showindex=False))
+    data_frame = data_frame.sort_values('%idle', ignore_index=True, ascending=True, na_position='last')
+    data_frame['%idle'] = data_frame['%idle'].astype('float')
+    data_frame['%idle'] = data_frame['%idle'].round(3)
+    min_val = data_frame['%idle'].min()
+    print(min_val)
+    data_frame1 = data_frame[data_frame['%idle'] > min_val]
+    print(tabulate(data_frame1.head(10), headers=data_frame.columns, showindex=False, floatfmt='.1f'))
+    data_frame1.fillna(value='-', inplace=True)
+    # print(tabulate(data_frame1.head(10), headers=data_frame.columns, showindex=False, floatfmt='.1f'))
+    return data_frame1
 
 
 def main():
     path = Path()
     while True:
-        choice = int(input("Enter a Choice\n1. Combine Data\n2. Filter data\n3. Graphs\n4. exit"))
+        choice = int(input("Enter a Choice\n1. Combine Data\n2. Filter data\n3. Graphs\n4. Summary\n5. Remove NaN\n6. "
+                           "Remove Unnamed\n7. exit"))
         if choice == 1:
 
             for file in path.glob('*.csv'):
@@ -135,7 +235,49 @@ def main():
             else:
                 print("Wrong File name")
 
-        else:
+        elif choice == 4:
+            filename = input("enter a filename")
+            if '.csv' in filename and os.path.isfile(filename):
+                df = pd.read_csv(filename)
+                df['NAT'] = df["NAT"].replace(float(0), '-')
+                if 'Unnamed: 0' in df.columns:
+                    df.drop(columns='Unnamed: 0', inplace=True)
+                df = df.loc[df['CPU'] == ' all']
+                report(df, call=1)
+                df = pd.read_csv(filename)
+                df['NAT'] = df["NAT"].replace(float(0), '-')
+                if 'Unnamed: 0' in df.columns and 'Unnamed: 0.1' in df.columns:
+                    df.drop(columns='Unnamed: 0', inplace=True)
+                    df.drop(columns='Unnamed: 0.1', inplace=True)
+                df = df.loc[df['CPU'] != ' all']
+                report(df, call=2)
+            else:
+                print('Wrong File name')
+
+        elif choice == 5:
+            filename = input("enter a filename")
+            if '.csv' in filename and os.path.isfile(filename):
+                df = pd.read_csv(filename)
+                df = df.replace(np.nan, '-')
+                new_file = input('Enter new file name to save')
+                df.to_csv(new_file, index=False)
+                print(f'{new_file} has been created')
+
+            else:
+                print('Wrong File name')
+
+        elif choice == 6:
+            filename = input("enter a filename")
+            if '.csv' in filename and os.path.isfile(filename):
+                df = pd.read_csv(filename)
+                if 'Unnamed: 0' in df.columns or 'Unnamed: 0.1' in df.columns:
+                    df.drop(columns='Unnamed: 0', inplace=True)
+                    df.drop(columns='Unnamed: 0.1', inplace=True)
+                    new_file1 = input('Enter new file name to save')
+                    df.to_csv(new_file1, index=False)
+                    print(f'{new_file1} has been saved with changes')
+
+        elif choice == 7:
             sys.exit()
 
 
